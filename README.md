@@ -8,7 +8,7 @@ The thesis was carried out in collaboration with [Deltares](https://www.deltares
 
 The thesis committee of this project was composed of [Dr. Riccardo Taormina](https://www.tudelft.nl/citg/over-faculteit/afdelingen/watermanagement/medewerker/universitair-docent-onderwijzer/dr-riccardo-taormina) (Committee chairman, TU Delft), [Dr. ir. Erik Mosselman](https://www.deltares.nl/en/expertise/our-people/erik-mosselman) (Main supervisor, Deltares & TU Delft), and [Dr. ir. Víctor Chavarrías](https://www.deltares.nl/en/expertise/our-people/victor-chavarrias) (Supervisor, Deltares).
 
-For any information, feel free to contact the author at: antonio.magherini@gmail.com (private account, recommended).
+For any information, feel free to contact the author at: _antonio.magherini@gmail.com_.
 
 The structure of this repository is the following:
 - <code>benchmarks</code>, contains modules and notebooks of the benhcmark models used for comparison;

@@ -1,5 +1,4 @@
 # This module contains the functions used for the dataset generation needed as input and target for the deep-learning model
-# Author of the module: Antonio Magherini antonio.magherini@gmail.com 
 
 import os
 import torch 

@@ -1,5 +1,4 @@
 # This module contains the functions used for loading and preprocessing the satellite images
-# Author of the module: Antonio Magherini antonio.magherini@gmail.com 
 
 import os 
 import math

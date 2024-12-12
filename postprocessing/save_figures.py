@@ -24,10 +24,10 @@ def save_image_figure(fig, folder=None, output_name=None, output_path=r'images\r
            format = str, format for the image to be saved
                     default: 'png'
            cmap = str, key to set the visualization channels
-                  default: 'gray'
-           vmin = int, minimum value needed for visualization
+                  default: 'gray', grayscale visualisation
+           vmin = int, minimum value needed for visualisation
                   default: 0, can range from 0 to 255. 
-           vmax = int, maximum value needed for visualization
+           vmax = int, maximum value needed for visualisation
                   default: 1, can range from 0 to 255. 
     
     Output:

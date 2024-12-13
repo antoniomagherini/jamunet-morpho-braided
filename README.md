@@ -1,6 +1,6 @@
 # JAMUNET: PREDICTING THE MORPHOLOGICAL CHANGES OF BRAIDED SAND-BED RIVERS WITH DEEP LEARNING
 
-This repository stores the data, files, code and other documents necessary for the completion of the Master's thesis of [Antonio Magherini](https://nl.linkedin.com/in/antonio-magherini-4349b2229),
+This repository stores the data, code, and other files necessary for the completion of the Master's thesis of [Antonio Magherini](https://nl.linkedin.com/in/antonio-magherini-4349b2229),
 student of the MSc Civil Engineering program - Hydraulic Engineering track, with a specialization in River Engineering 
 at the [Faculty of Civil Engineering and Geosciences](https://www.tudelft.nl/citg) of Delft University of Technology (TU Delft).
 \

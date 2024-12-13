@@ -341,7 +341,7 @@ def erosion_sites(model, dataset, sample, nonwater=0, water=1, water_threshold=0
     Deposition: 'non-water' pixels at target year that were 'water' at last input year. 
 
     Inputs:
-           model = class, deep-learning model trained for predicting the morphological changes  
+           model = class, trained deep-learning model to be validated/tested
            dataset = TensorDataset, dataset used for the model
            sample = int, specifies the input-target combination 
            nonwater = int, class value for non-water pixels.
@@ -357,7 +357,7 @@ def erosion_sites(model, dataset, sample, nonwater=0, water=1, water_threshold=0
            spatial_temporal = str, specifies if model is trained with spatial or temporal dataset
                               default: 'spatial'. Other available option: 'temporal'
            device = str, specifies device where memory is allocated for performing the computations
-                    default: 'cuda:0', other availble option: 'cpu' 
+                    default: 'cuda:0' (GPU), other availble option: 'cpu' 
            save_img = bool, sets whether the function is used for saving the image or not
                       default: False, image is not being saved 
 
@@ -559,6 +559,8 @@ def total_losses_metrics_dataset(model, dataset, loss_f='BCE', nonwater=0, water
     ''' 
     model.to(device)
     model.eval()
+
+    # set batch_size = 1 to remove its effect on the loss averaging computation 
     batch_size = 1
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
     
@@ -591,7 +593,6 @@ def total_losses_metrics_dataset(model, dataset, loss_f='BCE', nonwater=0, water
             f1_scores.append(f1_score)
             csi_scores.append(csi_score)
     
-    ### check averaging
     if overall:
         avg_loss = np.mean(losses) 
         avg_accuracies = np.mean(accuracies) 
@@ -611,10 +612,9 @@ CSI score:         {avg_csi_scores:.3f}')
     else:
         return losses, accuracies, precisions, recalls, f1_scores, csi_scores
 
-def plot_dataset_losses_metrics(model, dataset, loss_f='BCE', train_val_test='testing', nonwater=0, water=1, water_threshold=0.5,  
-                                model_type='min loss', spatial_temporal='spatial', device='cuda:0', save_img=False):
+def total_losses_metrics_dataset(model, dataset, loss_f='BCE', nonwater=0, water=1, water_threshold=0.5, device='cuda:0'):
     '''
-    Plot loss and metrics for each sample of the given dataset.
+    Get loss and metrics for each sample of the given dataset
 
     Inputs:
            model = class, deep-learning model trained for predicting the morphological changes  
@@ -622,9 +622,71 @@ def plot_dataset_losses_metrics(model, dataset, loss_f='BCE', train_val_test='te
            loss_f = str, key that specifies the function for computing the loss,
                     default: 'BCE', the other available option is 'BCE_Logits' but in this case make sure 
                     that the model output is not activated with a sigmoid function.
+                    If other loss functions are set it raises an Exception.
+           mask = bool, sets whether the input dataset is masked in order to remove no-data pixels and replace these with 0 = non-water
+           nonwater = int, class value for non-water pixels.
+                      default: 0, if classes are not scaled it should be set = 1
+           water = int, class value for water pixels.
+                   default: 1, if classes are not scaled it should be set = 2 
+           water_threshold = float, threshold value for classifying water pixels
+                             default: 0.5
+           device = str, specifies device where memory is allocated for performing the computations
+                    default: 'cuda:0', other availble option: 'cpu'
+    
+    Output: 
+           losses, accuracies, precisions, recalls, f1_scores, csi_scores = lists of floats, contain the loss,
+                                                                            accuracy, precision, recall, F1-score and CSI-score
+                                                                            for all dataset samples
+    '''   
+#     losses, accuracies, precisions, recalls, f1_scores, csi_scores = validation_unet(model, dataset, nonwater=nonwater, water=water, device=device, loss_f=loss_f, 
+#                                                                                      water_threshold=0.5)
+    model.to(device)
+    model.eval() # specifies the model is in evaluation mode = validation
+
+    test_loader = DataLoader(dataset, batch_size=16, shuffle=False)
+    losses = []
+    accuracies = []
+    precisions = []
+    recalls = []
+    f1_scores = []
+    csi_scores = []
+    
+    with torch.no_grad():
+        for batch in test_loader:
+            input = batch[0].to(device)
+            target = batch[1].to(device)
+    
+            # get predictions
+            predictions = get_predictions(model, input, device=device)
+            binary_predictions = (predictions >= water_threshold).float()
+            # compute loss 
+            loss = choose_loss(predictions, target, loss_f)
+            accuracy, precision, recall, f1_score, csi_score = compute_metrics(binary_predictions, target, nonwater, water)
+            
+            losses.append(loss.cpu().detach())
+            accuracies.append(accuracy)
+            precisions.append(precision)
+            recalls.append(recall)
+            f1_scores.append(f1_score)
+            csi_scores.append(csi_score)
+    avg = np.mean(losses)
+    print(avg)
+    return losses, accuracies, precisions, recalls, f1_scores, csi_scores 
+
+def plot_dataset_losses_metrics(model, dataset, loss_f='BCE', train_val_test='testing', nonwater=0, water=1, water_threshold=0.5,  
+                                model_type='min loss', spatial_temporal='spatial', device='cuda:0', save_img=False):
+    '''
+    Plot loss and metrics for each sample of the given dataset.
+
+    Inputs:
+           model = class, trained deep-learning model to be validated/tested  
+           dataset = TensorDataset, dataset used for the model
+           loss_f = str, key that specifies the function for computing the loss,
+                    default: 'BCE', the other available option is 'BCE_Logits' but in this case make sure 
+                    that the model output is not activated with a sigmoid function.
                     If other loss functions are set it raises an Exception. 
            train_val_test = str, specifies for what the images are used for.
-                            available options: 'training', 'validation' and 'testing'
+                            default: 'testing'. Other available options: 'training', 'validation'
            nonwater = int, class value for non-water pixels.
                       default: 0, if classes are not scaled it should be set = 1
            water = int, class value for water pixels.
@@ -636,7 +698,7 @@ def plot_dataset_losses_metrics(model, dataset, loss_f='BCE', train_val_test='te
            spatial_temporal = str, specifies if model is trained with spatial or temporal dataset
                               default: 'spatial'. Other available option: 'temporal'
            device = str, specifies device where memory is allocated for performing the computations
-                    default: 'cuda:0', other availble option: 'cpu' 
+                    default: 'cuda:0' (GPU), other availble option: 'cpu' 
            save_img = bool, sets whether the function is used for saving the image or not
                       default: False, image is not being saved 
 
@@ -708,7 +770,7 @@ def box_plots(model, dataset, loss_f='BCE', nonwater=0, water=1, water_threshold
     Plot loss and metrics box-plots for a given dataset.
 
     Inputs:
-           model = class, deep-learning model trained for predicting the morphological changes  
+           model = class, trained deep-learning model to be validated/tested 
            dataset = TensorDataset, dataset used for the model
            loss_f = str, key that specifies the function for computing the loss,
                     default: 'BCE', the other available option is 'BCE_Logits' but in this case make sure 
@@ -727,7 +789,7 @@ def box_plots(model, dataset, loss_f='BCE', nonwater=0, water=1, water_threshold
            spatial_temporal = str, specifies if model is trained with spatial or temporal dataset
                               default: 'spatial'. Other available option: 'temporal'
            device = str, specifies device where memory is allocated for performing the computations
-                    default: 'cuda:0', other availble option: 'cpu' 
+                    default: 'cuda:0' (GPU), other availble option: 'cpu' 
            save_img = bool, sets whether the function is used for saving the image or not
                       default: False, image is not being saved 
 
@@ -803,7 +865,7 @@ def erosion_deposition_distribution(model, dataset, nonwater=0, water=1, water_t
     Plot distributions of total areas of erosion and deposition
     
     Inputs:
-           model = class, deep-learning model trained for predicting the morphological changes  
+           model = class, trained deep-learning model to be validated/tested 
            dataset = TensorDataset, dataset used for the model
            nonwater = int, class value for non-water pixels.
                       default: 0, if classes are not scaled it should be set = 1
@@ -820,7 +882,7 @@ def erosion_deposition_distribution(model, dataset, nonwater=0, water=1, water_t
            spatial_temporal = str, specifies if model is trained with spatial or temporal dataset
                               default: 'spatial'. Other available option: 'temporal'
            device = str, specifies device where memory is allocated for performing the computations
-                    default: 'cuda:0', other availble option: 'cpu' 
+                    default: 'cuda:0' (GPU), other availble option: 'cpu' 
            save_img = bool, sets whether the function is used for saving the image or not
                       default: False, image is not being saved 
 
@@ -899,7 +961,7 @@ def correlation_metrics(model, dataset, loss_f='BCE', nonwater=0, water=1, water
     Plot correlation matrix of loss and metrics. 
     
     Inputs:
-           model = class, deep-learning model trained for predicting the morphological changes  
+           model = class, trained deep-learning model to be validated/tested
            dataset = TensorDataset, dataset used for the model
            loss_f = str, key that specifies the function for computing the loss,
                     default: 'BCE', the other available option is 'BCE_Logits' but in this case make sure 
@@ -918,7 +980,7 @@ def correlation_metrics(model, dataset, loss_f='BCE', nonwater=0, water=1, water
            spatial_temporal = str, specifies if model is trained with spatial or temporal dataset
                               default: 'spatial'. Other available option: 'temporal'
            device = str, specifies device where memory is allocated for performing the computations
-                    default: 'cuda:0', other availble option: 'cpu' 
+                    default: 'cuda:0' (GPU), other availble option: 'cpu' 
            save_img = bool, sets whether the function is used for saving the image or not
                       default: False, image is not being saved 
 
@@ -1009,7 +1071,7 @@ def correlation_erdep(model, dataset, nonwater=0, water=1, water_threshold=0.5, 
     Plot correlation matrix of total areas of erosion and deposition.
     
     Inputs:
-           model = class, deep-learning model trained for predicting the morphological changes  
+           model = class, trained deep-learning model to be validated/tested
            dataset = TensorDataset, dataset used for the model
            nonwater = int, class value for non-water pixels.
                       default: 0, if classes are not scaled it should be set = 1
@@ -1026,7 +1088,7 @@ def correlation_erdep(model, dataset, nonwater=0, water=1, water_threshold=0.5, 
            spatial_temporal = str, specifies if model is trained with spatial or temporal dataset
                               default: 'spatial'. Other available option: 'temporal'
            device = str, specifies device where memory is allocated for performing the computations
-                    default: 'cuda:0', other availble option: 'cpu' 
+                    default: 'cuda:0' (GPU), other availble option: 'cpu' 
            save_img = bool, sets whether the function is used for saving the image or not
                       default: False, image is not being saved 
 
@@ -1110,7 +1172,7 @@ def metrics_thresholds(model, data_loader, loss_f='BCE', device='cuda:0', save_i
     Plot metrics evolution with varying binary threshold.
     
     Inputs:
-           model = class, deep-learning model trained for predicting the morphological changes  
+           model = class, trained deep-learning model to be validated/tested 
            dataloader = loader = torch.utils.data.DataLoader element, data loader that combines a dataset 
                         and a sampler to feed data to the model in batches
            loss_f = str, key that specifies the function for computing the loss,
@@ -1118,7 +1180,7 @@ def metrics_thresholds(model, data_loader, loss_f='BCE', device='cuda:0', save_i
                     that the model output is not activated with a sigmoid function.
                     If other loss functions are set it raises an Exception. 
            device = str, specifies device where memory is allocated for performing the computations
-                    default: 'cuda:0', other availble option: 'cpu' 
+                    default: 'cuda:0' (GPU), other availble option: 'cpu' 
            save_img = bool, sets whether the function is used for saving the image or not
                       default: False, image is not being saved 
 

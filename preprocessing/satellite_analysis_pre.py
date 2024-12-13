@@ -501,3 +501,75 @@ def load_avg(train_val_test, reach, year, dir_averages=r'data\satellite\averages
     img = pd.read_csv(path, header=None).to_numpy()
     return img
 
+def get_path(collection, cloud_cov=100, old=False):
+    '''
+    Get the path of the .csv file containing the number of satellite images available of a given dataset 
+    based on the collection name
+
+    Inputs: 
+           collection = str, specifies collection name accordingly to Google Earth Engine nomenclature
+           cloud_cov = int, specifies max percentage of cloud cover above which images are discarded. 
+                       default: 100, if set to 'None' cloud coverage is undefined and all images are considered
+           old = boolean, specifies whether old charts are loaded - a different name was given to the files
+                 default: False, only loads newest data.  
+
+    Outputs: 
+            file_path = str, file path of the .csv file of the given collection.
+    '''
+    if cloud_cov == 'None':
+         cloud_cov = '_undefined'
+    file_path = fr'\total_images_cloud{cloud_cov}' + r'/' + collection.replace('/', '_')  + fr'_chart_data_cloud{cloud_cov}' + '.csv'
+    if old==True:
+         file_path = r'\old\ee-chart_' + collection.replace('/', '_') + '.csv'
+    return file_path
+
+def load_df(collection, cloud_cov=100, dir_files=r'data\satellite\original', print_total=True, old=False):
+    '''
+    Load the .csv file containing information on images available for the given dataset.
+
+    Inputs: 
+           collection = str, specifies collection name accordingly to Google Earth Engine nomenclature
+           cloud_cov = int, specifies max percentage of cloud cover above which images are discarded. 
+                       default: 100, if set to 'None' cloud coverage is undefined and all images are considered
+           dir_files = str, directory of the general folder containing all .csv files
+                       default: 'data\satellite\original' 
+           print_total = bool, specifies whether to print total number of imagse available or not
+                         default: True, set to False for plot functions
+           old = boolean, specifies whether old charts are loaded - a different name was given to the files
+                 default: False, only loads newest data. 
+
+    Outputs: 
+            df = pandas df, containing date of image, count of images per day and cumulative amount of images
+            print statement specifying total number of images for the given dataset
+    '''
+    file_path = get_path(collection, cloud_cov, old)
+    df = pd.read_csv(dir_files + file_path)
+    df.columns = ['Date (yyyy-mm-dd)', 'Count']
+
+    # convert to date type 
+    df['Date (yyyy-mm-dd)'] = pd.to_datetime(df['Date (yyyy-mm-dd)'], format='%Y-%m-%d') 
+    # keep only day-month-year format
+    df['Date (yyyy-mm-dd)'] = df['Date (yyyy-mm-dd)'].dt.date  
+
+    # get total number of images per dataset
+    df['Cumulative count'] = 1
+    
+    for i in range(1, len(df)):                                                           
+        df['Cumulative count'].iloc[i] = df['Cumulative count'].iloc[i] + df['Cumulative count'].iloc[i-1] 
+        
+        # get time interval between two consecutive images
+        delta_t = (df.at[i, 'Date (yyyy-mm-dd)'] - df.at[i - 1, 'Date (yyyy-mm-dd)']).days
+        df.at[i, 'Delta t'] = delta_t
+        
+        # raise count by 1 if more than one image is taken in a day
+        if df['Date (yyyy-mm-dd)'].iloc[i] == df['Date (yyyy-mm-dd)'].iloc[i-1]:
+              df['Count'].iloc[i] += 1
+    
+    # set first entry of time interval to 0 (would be NaN otherwise)
+    df['Delta t'].iloc[0] = 0
+
+    if print_total == True:
+        print(f"Total number of images for {collection}: {df['Cumulative count'].iloc[-1]}\n")
+    df
+    return df
+

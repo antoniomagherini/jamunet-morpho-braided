@@ -244,8 +244,8 @@ def create_full_dataset(train_val_test, year_target=5, nonwater_threshold=480000
                         default: r'JRC_GSW1_4_MonthlyHistory', the function is implemented to work only with this dataset
            scaled_classes = bool, sets whether pixel classes are scaled to the range [-1, 1] or kept within the original one [0, 2]
                             default: True, pixel classes are scaled (recommended).
-           device = str, , specifies device where memory is allocated for performing the computations
-                    default: 'cuda' (GPU), other availble option: 'cpu'
+           device = str, specifies device where memory is allocated for performing the computations
+                    default: 'cuda: 0' (GPU), other availble option: 'cpu'
            dtype = class, specifies the data type for torch.tensor method.
                    default: torch.int64, it also accepts `torch.float32` to allow gradient computation and backpropagation
     
@@ -522,7 +522,7 @@ def create_split_dataset(month, use_dataset, year_target=5, year_end_train=2009,
            scaled_classes = bool, sets whether pixel classes are scaled to the range [-1, 1] or kept within the original one [0, 2]
                             default: True, pixel classes are scaled (recommended).
            device = str, specifies device where memory is allocated for performing the computations
-                    default: 'cuda' (GPU), other availble option: 'cpu'
+                    default: 'cuda:0' (GPU), other availble option: 'cpu'
            dtype = class, specifies the data type for torch.tensor method.
                    default: torch.int64, it also accepts `torch.float32` to allow gradient computation and backpropagation
     

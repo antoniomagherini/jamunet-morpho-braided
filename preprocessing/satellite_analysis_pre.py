@@ -301,6 +301,42 @@ def preprocess_images(input_path, desired_shape=(1000,500), reshape_img=True,
     cv2.imwrite(output_path, img_resh)
     return None
 
+def count_pixels(image, value=-1):
+    '''
+    Calculate the total number of pixels of a specific class (see classification below) of a single image.  
+
+    This function only works for the JRC collection, which has classified images with the following classification:
+                   0: no-data 
+                   1: non-water
+                   2: water
+    
+    Currently, pixel classes are scaled as follows:
+                   -1: no-data
+                   0: non-water
+                   1: water
+
+    Given the current image size (1000 x 500 pixels, representative of ~ 60000 x 30000 km reaches with image resolution of 60 m), 
+    the total number of pixels is n_tot = 1000 * 500 =  500 000 pixels.
+
+    Input: 
+          image = array, representing classified satellite image
+          value = int, class to be counted  (see classification above).
+                  default: -1, no-data pixels
+    
+    Output:
+           tot_pixels = int, total number of class-specific pixels present in the input image.
+    '''
+    if value < -1 or value > 2:
+        raise ValueError(f'The chosen class {value} is not available for JRC Monthly History dataset. Available options are:\n\
+0: no-data pixels, 1: non-water pixels, 2: water pixels\n\
+Or alternatively:\n\
+-1: no-data pixels, 0: non-water pixels, 1: water pixels')
+    
+    # image_shape = np.shape(image)
+    tot_pixels = np.sum(image == value)
+
+    return tot_pixels
+
 def season_average(train_val_test, reach, year, dir_datasets=r'data\satellite', nodata=-1):
     '''
     Compute the average pixel values across a single low-flow season (from January to April of the same year).

@@ -1,4 +1,4 @@
-# 
+# This module stores the code for the CNN U-Net model
 
 import torch
 import torch.nn as nn
@@ -24,11 +24,11 @@ class DoubleConv(nn.Module):
             self.double_conv.add_module('dropout', nn.Dropout2d(p=p_drop))
 
     def forward(self, x):
-        x = self.double_conv(x)  # Applies 2D convolution
-        # Reshape x for 3D convolution (batch_size, mid_channels, 1, height, width)
+        x = self.double_conv(x)  # 2D convolution
+        # reshape input for 3D convolution (batch_size, mid_channels, depth = 1, height, width)
         x = x.unsqueeze(2)
-        x = self.conv3d(x)  # Applies 3D convolution
-        x = x.squeeze(2)  # Remove the extra dimension
+        x = self.conv3d(x)  # 3D convolution
+        x = x.squeeze(2)  # reshape to original dimension by removing the depth
         return x
 
 class Down(nn.Module):
@@ -97,27 +97,27 @@ class UNet3D(nn.Module):
         hid_dims = [init_hid_dim * (2**i) for i in range(5)]
         self.hid_dims = hid_dims
 
-        # Initial 2D Convolution
+        # initial 2D Convolution
         self.inc = DoubleConv(n_channels, hid_dims[0], kernel_size=kernel_size, drop_channels=drop_channels, p_drop=p_drop)
 
-        # Downscaling with 2D Convolution followed by MaxPooling
+        # downscaling with 2D Convolution followed by pooling
         self.down1 = Down(hid_dims[0], hid_dims[1], kernel_size, pooling, drop_channels, p_drop)
         self.down2 = Down(hid_dims[1], hid_dims[2], kernel_size, pooling, drop_channels, p_drop)
         self.down3 = Down(hid_dims[2], hid_dims[3], kernel_size, pooling, drop_channels, p_drop)
 
-        # Temporal Convolution with 3D Convolution
+        # temporal convolution with 3D Convolution
         self.temporal_conv = nn.Conv3d(hid_dims[3], hid_dims[3], kernel_size=(1, 3, 3), padding=(0, 1, 1))
 
-        # Downscaling with 2D Convolution followed by MaxPooling
+        # downscaling with 2D Convolution followed by pooling
         factor = 2 if bilinear else 1
         self.down4 = Down(hid_dims[3], hid_dims[4] // factor, kernel_size, pooling, drop_channels, p_drop)
 
-        # Upscaling with 2D Convolution followed by Double Convolution
+        # upscaling with 2D Convolution followed by Double Convolution
         self.up1 = Up(hid_dims[4], hid_dims[3] // factor, kernel_size, bilinear, drop_channels, p_drop)
         self.up2 = Up(hid_dims[3], hid_dims[2] // factor, kernel_size, bilinear, drop_channels, p_drop)
         self.up3 = Up(hid_dims[2], hid_dims[1] // factor, kernel_size, bilinear, drop_channels, p_drop)
 
-        # Final 2D Convolution for output
+        # final 2D Convolution for output
         self.up4 = Up(hid_dims[1], hid_dims[0], kernel_size, bilinear, drop_channels, p_drop)
         self.outc = OutConv(hid_dims[0], n_classes)
         self.sigmoid = nn.Sigmoid()
@@ -128,10 +128,10 @@ class UNet3D(nn.Module):
         x3 = self.down2(x2)
         x4 = self.down3(x3)
 
-        # Temporal Convolution
-        x4_temporal = x4.unsqueeze(2)  # Add temporal dimension
+        # temporal 3D Convolution
+        x4_temporal = x4.unsqueeze(2)  # add temporal dimension
         x4_temporal = self.temporal_conv(x4_temporal)
-        x4 = x4_temporal.squeeze(2)  # Remove temporal dimension
+        x4 = x4_temporal.squeeze(2)  # remove temporal dimension
 
         x5 = self.down4(x4)
         x = self.up1(x5, x4)

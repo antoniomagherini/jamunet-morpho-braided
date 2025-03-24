@@ -67,7 +67,7 @@ The structure of this repository is the following:
 - <code>model</code>, contains the modules and noteboooks with the deep-learning model;
 - <code>other</code>, contains documents, images, and other files used during the project;
 - <code>postprocessing</code>, contains the modules used for the data postprocessing;
-- <code>preliminary</code>, contains the notebooks with the preliminary data analysis, satellite image visualization, preprocessing steps, and other examples; (to be added soon)
+- <code>preliminary</code>, contains the notebooks with the preliminary data analysis, satellite image visualization, preprocessing steps, and other examples;
 - <code>preprocessing</code>, contains the modules used for the data preprocessing.
 
 ---

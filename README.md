@@ -65,7 +65,7 @@ The structure of this repository is the following:
 - <code>data</code>, contains raw data (satellite images, river variables);
 - <code>images</code>, contains the images shown in the thesis report and other documents; (to be added soon)
 - <code>model</code>, contains the modules and noteboooks with the deep-learning model;
-- <code>other</code>, contains documents, images, and other files used during the project; (to be added soon)
+- <code>other</code>, contains documents, images, and other files used during the project;
 - <code>postprocessing</code>, contains the modules used for the data postprocessing;
 - <code>preliminary</code>, contains the notebooks with the preliminary data analysis, satellite image visualization, preprocessing steps, and other examples; (to be added soon)
 - <code>preprocessing</code>, contains the modules used for the data preprocessing.

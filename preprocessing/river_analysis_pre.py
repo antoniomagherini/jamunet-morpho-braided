@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # specify path of flow data 
-path_flow_data = r'data/flow/original'
+path_flow_data = r'data/flow'
 
 # set formats for dataframes data type
 format_main = '%d/%m/%Y'

@@ -153,7 +153,7 @@ def create_datasets(train_val_test, reach, year_target=5, nodata_value=-1, dir_f
     target_dataset = []
     
     # loop through images to append these in the originally empty lists
-    for i in range(len(good_images_array)-year_target):
+    for i in range(len(good_images_array)-year_target+1): # add +1 at the end to include last available year
         input_dataset.append(good_images_array[i:i+year_target-1])
         target_dataset.append([good_images_array[i+year_target-1]])
 

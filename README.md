@@ -14,7 +14,7 @@
         The thesis was carried out in collaboration with <a href="https://www.deltares.nl/en">Deltares</a>. The manuscript can be found at <a href="https://repository.tudelft.nl/record/uuid:38ea0798-dd3d-4be2-b937-b80621957348">TU Delft repository</a>.
       </p>
       <p style="font-size: 16px;">
-        For any information, feel free to contact the author at: <a href="mailto:antonio.magherini@gmail.com"><em>antonio.magherini@gmail.com</em></a>.
+        For any information, feel free to contact the author at: <a href="mailto:antonio.magherini@epfl.ch"><em>antonio.magherini@epfl.ch</em></a>.
       </p>
       <p style="margin-top: 100px;">
         <em>The image represents the Brahmaputra-Jamuna River at the border between India and Bangladesh. The image was taken on January 25, 1994. It was retrieved from <a href="https://earthengine.google.com/">Google Earth Engine</a> <a href="https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LT05_C02_T1_L2">USGS Landsat 5 collection</a>.</em>

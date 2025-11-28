@@ -95,3 +95,40 @@ exportImagesToDrive(collection, 'JRC_GSW1_4_MonthlyHistory', 24, training, Start
 // for (var i = 1; i <= 3; i++) {
 //   exportImagesToDrive(collection, 'JRC_GSW1_4_MonthlyHistory', i, training, Start_period, End_period);
 // }
+
+// to run batch task execution copy-paste in console the following lines
+
+// 1 // wait until all RUN are listed
+
+// function runTaskList(){
+// // var tasklist = document.getElementsByClassName('task local type-EXPORT_IMAGE awaiting-user-config');
+// // for (var i = 0; i < tasklist.length; i++)
+// //         tasklist[i].getElementsByClassName('run-button')[0].click();
+// $$('.run-button' ,$$('ee-task-pane')[0].shadowRoot).forEach(function(e) {
+//     e.click();
+// })
+// // }
+
+// runTaskList(); 
+
+// 2 // confirm all RUN
+
+// function confirmAll() {
+// // var ok = document.getElementsByClassName('goog-buttonset-default goog-buttonset-action');
+// // for (var i = 0; i < ok.length; i++)
+// //     ok[i].click();
+// $$('ee-table-config-dialog, ee-image-config-dialog').forEach(function(e) {
+//     var eeDialog = $$('ee-dialog', e.shadowRoot)[0]
+//     var paperDialog = $$('paper-dialog', eeDialog.shadowRoot)[0]
+//     $$('.ok-button', paperDialog)[0].click()
+// })
+// }
+
+// confirmAll();
+
+// // Loop through datasets and create charts
+// for (var i = 0; i < datasets.length; i++) {
+//   var dataset = datasets[i];
+//   var collection = ee.ImageCollection(dataset);
+//   createAndExportCharts(collection, dataset);
+// }

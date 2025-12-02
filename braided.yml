@@ -1,31 +1,56 @@
-# This environment is intended to be used for running JamUNet and additional notebooks
-
 name: braided
 channels:
+  - pytorch
+  - nvidia
   - conda-forge
   - defaults
+
 dependencies:
+  - python=3.10
+
+  # Package managers
+  - pip                # <-- added so pip installs work
+
+  # SSL / certificates
   - ca-certificates
   - certifi
-  - dash=2.13.0
+  - openssl
+
+  # Core scientific stack
+  - numpy=1.24.2
+  - pandas=1.5.3
+  - scipy=1.9.3
+  - scikit-learn=1.2.2
+  - matplotlib=3.5.2
+  - seaborn=0.12.2
   - dask
+
+  # IO / misc
   - gdal
+  - openpyxl
+  - tabulate
+  - tqdm=4.66.1
   - importlib-metadata=7.0.1
-  - ipympl=0.9.3
+
+  # Jupyter tools
   - jupyter=1.0.0
   - jupyterlab=3.4.4
-  - matplotlib=3.5.2
-  - numpy=1.24.2
-  - openpyxl
-  - openssl
-  - pandas=1.5.3
-  - python=3.9.17
-  - pytorch::pytorch=2.0.1
-  - scikit-learn=1.2.2
-  - scipy=1.9.3
-  - seaborn=0.12.2
-  - tabulate
+  - ipympl=0.9.3
+
+  # Dash
+  - dash=2.13.0
+
+  # --- CUDA-enabled PyTorch ---
+  # Latest stable for CUDA 12.4
+  - pytorch=2.5.1
+  - pytorch-cuda=12.4
+  - torchvision=0.20.1
+  - torchaudio=2.5.1
+
+  # Utilities
   - torchinfo=1.8.0
-  - torchvision
-  - tqdm=4.66.1
-  # - pytorch::cpuonly
+
+  # pip-only dependencies (none required except if you need extras)
+  - pip:
+      - torchvision==0.20.1   # ensures consistency
+      - torchaudio==2.5.1

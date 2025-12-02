@@ -286,7 +286,7 @@ def show_evolution_nolegend(sample_img, dataset, model, nonwater=0, water=1, wat
     ax[1,3].bar(bar_positions + bar_width/2, pred_erosion_deposition, bar_width, label='Predicted areas', color='white', edgecolor='k', hatch='xxx')
     
     ax[1,3].set_ylabel('Area (km²)', fontsize=13)
-    ax[1,3].set_xticks(bar_positions, fontsize=12)
+    ax[1,3].set_xticks(bar_positions)
     ax[1,3].set_xticklabels(categories, fontsize=12)
     ax[1,3].yaxis.tick_right()  # move ticks to the right
     ax[1,3].yaxis.set_label_position('right')  # move label to the right
@@ -306,8 +306,8 @@ def show_evolution_nolegend(sample_img, dataset, model, nonwater=0, water=1, wat
             if j == 3 and i == 1:
                 continue  # skip ticks and labels for the last subplot (erosion and deposition areas) 
 
-            ax[i,j].set_xticks(x_ticks, fontsize=12)
-            ax[i,j].set_yticks(y_ticks, fontsize=12)
+            ax[i,j].set_xticks(x_ticks)
+            ax[i,j].set_yticks(y_ticks)
 
             if i == 1 and j < (ax.shape[1]-1):
                 ax[i,j].set_xlabel('Width (km)', fontsize=14)
@@ -429,9 +429,9 @@ def erosion_sites(model, dataset, sample, nonwater=0, water=1, water_threshold=0
         ax.tick_params(labelleft=False)
     
     for ax in axes:
-        ax.set_xticks(x_ticks, fontsize=12)
+        ax.set_xticks(x_ticks)
         ax.set_xticklabels(x_tick_labels, fontsize=12)
-        ax.set_yticks(y_ticks, fontsize=12)
+        ax.set_yticks(y_ticks)
         ax.set_xlabel('Width (km)', fontsize=14)
     
     fig.text(0.3, 0.74, 'Erosion', ha='center', va='center', fontsize=16)
@@ -1212,8 +1212,8 @@ def metrics_thresholds(model, data_loader, loss_f='BCE', device='cuda:0', save_i
     plt.xlim([0,1])
     plt.ylim([0,1])
 
-    plt.xticks(np.arange(0, 1.1, 0.10), fontsize=12)
-    plt.yticks(np.arange(0, 1.1, 0.10), fontsize=12)
+    plt.xticks(np.arange(0, 1.1, 0.10))
+    plt.yticks(np.arange(0, 1.1, 0.10))
     formatted_best_thr = f'{best_thr:.3f}'
     plt.annotate(f'Water threshold for\nmax F1-score: {formatted_best_thr}', xy=(0.505,0.75), fontsize=12, 
                  ha='center', bbox=dict(boxstyle="round,pad=0.3", edgecolor="black", facecolor="lightgray"))

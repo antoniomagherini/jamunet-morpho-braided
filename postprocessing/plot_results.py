@@ -367,12 +367,18 @@ def show_evolution_nolegend_nn(sample_img, dataset, model, nonwater=0, water=1, 
            None, it plots the inputs, target, and predicted images as well as the misclassification map 
                  and barplot of the areas of erosion and deposition 
     '''
-    input_img = dataset[sample_img][0].unsqueeze(0)
-    target_img = dataset[sample_img][1].cpu()
+    # input_img = dataset[sample_img][0].unsqueeze(0)
+    # target_img = dataset[sample_img][1].cpu()
 
-    prediction = model(input_img).detach().cpu() 
-    prediction = (prediction >= water_threshold).float()
+    input_img = dataset[sample_img][0].unsqueeze(0).to(device)  # move input to device
+    target_img = dataset[sample_img][1].to(device)         
 
+    # prediction = model(input_img).detach().cpu() 
+    # prediction = (prediction >= water_threshold).float()
+
+    # diff = prediction - target_img   
+    prediction = model(input_img).detach().cpu()                 # move prediction to CPU
+    target_img = target_img.cpu()                                 # move target to CPU
     diff = prediction - target_img
     
     shp = target_img.shape
@@ -402,8 +408,10 @@ def show_evolution_nolegend_nn(sample_img, dataset, model, nonwater=0, water=1, 
             ax[0,i].set_title(f'Input year {2016+i*1}', fontsize=13)
 
     im1 = ax[1,0].imshow(target_img, cmap=grey_cmap, vmin=0)
-    ax[1,1].imshow(prediction[0], cmap=grey_cmap)
-    im2 = ax[1,2].imshow(diff[0], cmap=diff_cmap, vmin=-1, vmax=1)
+    # ax[1,1].imshow(prediction[0], cmap=grey_cmap)
+    # im2 = ax[1,2].imshow(diff[0], cmap=diff_cmap, vmin=-1, vmax=1)
+    ax[1,1].imshow(prediction[0].squeeze(0), cmap=grey_cmap)    # remove channel dim
+    im2 = ax[1,2].imshow(diff[0].squeeze(0), cmap=diff_cmap, vmin=-1, vmax=1)
     ax[1,2].imshow(target_img, cmap=grey_diff_cmap, vmin=0, alpha=0.2)
 
     # compute locations of erosion and deposition
@@ -421,7 +429,7 @@ def show_evolution_nolegend_nn(sample_img, dataset, model, nonwater=0, water=1, 
     ax[1,3].bar(bar_positions + bar_width/2, pred_erosion_deposition, bar_width, label='Predicted areas', color='white', edgecolor='k', hatch='xxx')
     
     ax[1,3].set_ylabel('Area (km²)', fontsize=13)
-    ax[1,3].set_xticks(bar_positions, fontsize=12)
+    ax[1,3].set_xticks(bar_positions)
     ax[1,3].set_xticklabels(categories, fontsize=12)
     ax[1,3].yaxis.tick_right()  # move ticks to the right
     ax[1,3].yaxis.set_label_position('right')  # move label to the right
@@ -441,8 +449,8 @@ def show_evolution_nolegend_nn(sample_img, dataset, model, nonwater=0, water=1, 
             if j == 3 and i == 1:
                 continue  # skip ticks and labels for the last subplot (erosion and deposition areas) 
 
-            ax[i,j].set_xticks(x_ticks, fontsize=12)
-            ax[i,j].set_yticks(y_ticks, fontsize=12)
+            ax[i,j].set_xticks(x_ticks)
+            ax[i,j].set_yticks(y_ticks)
 
             if i == 1 and j < (ax.shape[1]-1):
                 ax[i,j].set_xlabel('Width (km)', fontsize=14)

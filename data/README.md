@@ -2,7 +2,7 @@
 
 This folder contains the data used for this project. 
 
-<code>qgis</code> contains the shapefiles of all reaches, past river interventions in the lower Jamuna River, and other geographical data. (to be updated soon)
+<code>qgis</code> contains the shapefiles of all reaches, past river interventions in the lower Jamuna River, and other geographical data.
 \
 <code>flow</code> contains the recorded river data (discharge, water level, flow velocity).
 \

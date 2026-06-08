@@ -6,7 +6,7 @@ This folder contains the modules (as <code>*.py</code> files) needed for the tra
 \
 <code>models_trained</code> contains the .pth files of the trained models.
 \
-<code>scalers</code> contains the normalisation scalers of the training datasets.
+<code>scalers</code> contains the normalisation scalers of the training datasets (not implemented).
 \
 <code>st_unet</code> contains the modules for the model.
 \

@@ -785,7 +785,7 @@ def total_losses_metrics_dataset(model, dataset, loss_f='BCE', nonwater=0, water
     recalls = []
     f1_scores = []
     csi_scores = []
-    
+
     with torch.no_grad():
         for batch in test_loader:
             input = batch[0].to(device)
@@ -842,7 +842,7 @@ def plot_dataset_losses_metrics(model, dataset, loss_f='BCE', train_val_test='te
     '''
     
     losses, accuracies, precisions, recalls, f1_scores, csi_scores = total_losses_metrics_dataset(model, dataset, loss_f, nonwater, 
-                                                                                                  water, water_threshold, overall=False, device=device) 
+                                                                                                  water, water_threshold, device=device) 
 
     avg_loss = np.mean(losses)
     samples = np.arange(1, len(losses) + 1, 1)
@@ -1361,3 +1361,68 @@ def metrics_thresholds(model, data_loader, loss_f='BCE', device='cuda:0', save_i
     else:
         plt.show()
     return None
+
+def erosion_deposition_recovery(model, dataset, nonwater=0, water=1, water_threshold=0.5, 
+                                pixel_size=60, device='cuda:0'):
+    '''
+    Copmute the percentage recovery of erosion and deposition areas for a given dataset. 
+    The recovery is computed as the ratio between the predicted and real areas of erosion and deposition.
+    
+    Inputs:
+           model = class, trained deep-learning model to be validated/tested 
+           dataset = TensorDataset, dataset used for the model
+           nonwater = int, class value for non-water pixels.
+                      default: 0, if classes are not scaled it should be set = 1
+           water = int, class value for water pixels.
+                   default: 1, if classes are not scaled it should be set = 2 
+           water_threshold = float, threshold value for classifying water pixels
+                             default: 0.5
+           pixel_size = int, image pixel resolution (m). Used for computing the erosion and deposition areas
+                        default: 60, exported image resolution from Google Earth Engine
+           train_val_test = str, specifies for what the images are used for.
+                            default: 'testing'. Other available options: 'training', 'validation'
+           model_type = str, specifies which model is considered
+                        default: 'min loss'. Other available option: 'max recall'
+           spatial_temporal = str, specifies if model is trained with spatial or temporal dataset
+                              default: 'spatial'. Other available option: 'temporal'
+           device = str, specifies device where memory is allocated for performing the computations
+                    default: 'cuda:0' (GPU), other availble option: 'cpu' 
+           save_img = bool, sets whether the function is used for saving the image or not
+                      default: False, image is not being saved 
+
+    Output: 
+           None, plots the distributions of predicted and real total areas of erosion (left) and deposition (right)
+    '''
+    
+    pred_erosion, pred_deposition = [], []
+    real_erosion, real_deposition = [], []
+    model.eval()
+
+    with torch.no_grad():
+       for sample in range(len(dataset)):
+              input = dataset[sample][0].unsqueeze(0).to(device)
+              target = dataset[sample][1].cpu()
+
+              pred = model(input).detach().cpu().squeeze(0).squeeze(0)
+              binary_pred = (pred >= water_threshold).float()
+
+              predicted_erosion_deposition = get_erosion_deposition(input[0][-1].cpu(), binary_pred, nonwater=nonwater, water=water, pixel_size=pixel_size)
+              real_erosion_deposition = get_erosion_deposition(input[0][-1].cpu(), target, nonwater=nonwater, water=water, pixel_size=pixel_size)
+              
+              pred_erosion.append(predicted_erosion_deposition[0])
+              pred_deposition.append(predicted_erosion_deposition[1])
+              real_erosion.append(real_erosion_deposition[0])
+              real_deposition.append(real_erosion_deposition[1])  
+
+    pred_erosion = np.asarray(pred_erosion, dtype=np.float64)
+    pred_deposition = np.asarray(pred_deposition, dtype=np.float64)
+    real_erosion = np.asarray(real_erosion, dtype=np.float64)
+    real_deposition = np.asarray(real_deposition, dtype=np.float64)
+
+    recovery_erosion = np.mean(pred_erosion / real_erosion)
+    recovery_deposition = np.mean(pred_deposition / real_deposition)
+
+    print(f'Recovery of erosion: {recovery_erosion:.4f}')
+    print(f'Recovery of deposition: {recovery_deposition:.4f}')
+    
+    return [recovery_erosion, recovery_deposition], [pred_erosion, pred_deposition, real_erosion, real_deposition]
